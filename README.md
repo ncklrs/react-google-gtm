@@ -67,25 +67,33 @@ sendGTMEvent({ event: 'page_view', page: 'home' });
 
 ## Event Tracking Utility Functions
 
-### `trackPageView(page: string)`
+```
+trackPageView(page: string)
+```
 
 Tracks a page view event.
 
 - `page` (string): The name of the page being viewed.
 
-### `trackButtonClick(buttonName: string)`
+```
+trackButtonClick(buttonName: string)
+```
 
 Tracks a button click event.
 
 - `buttonName` (string): The name of the button being clicked.
 
-### `trackFormSubmission(formId: string)`
+```
+trackFormSubmission(formId: string)
+```
 
 Tracks a form submission event.
 
 - `formId` (string): The ID of the form being submitted.
 
-### `trackCustomEvent(eventName: string, properties: Record<string, any>)`
+```
+trackCustomEvent(eventName: string, properties: Record<string, any>)
+```
 
 Tracks a custom event.
 
