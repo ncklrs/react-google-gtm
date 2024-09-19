@@ -91,8 +91,19 @@ Tracks a form submission event.
 
 - `formId` (string): The ID of the form being submitted.
 
+### trackCustomEvent(eventName: string, properties: Record<string, any>)
 ```
-trackCustomEvent(eventName: string, properties: Record<string, any>)
+
+import { trackCustomEvent } from 'react-google-gtm';
+
+const CustomEventButton: React.FC = () => {
+  const handleClick = () => {
+    trackCustomEvent('custom_event', { category: 'button', label: 'Custom Button Clicked' });
+  };
+
+  return <button onClick={handleClick}>Click Me</button>;
+};
+
 ```
 
 Tracks a custom event.
