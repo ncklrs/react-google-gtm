@@ -25,6 +25,39 @@ export { GTMDebugger } from "./src/components/GTMDebugger";
 export { ScrollTracker } from "./src/components/ScrollTracker";
 export { GTMErrorBoundary } from "./src/components/GTMErrorBoundary";
 
+// Type-Safe Event Builder (Phase 4)
+export { createGTMClient, useTypedGTM } from "./src/factory/createGTMClient";
+
+// Middleware (Phase 4)
+export {
+  MiddlewareManager,
+  loggerMiddleware,
+  timestampMiddleware,
+  createUserEnrichmentMiddleware,
+  createValidationMiddleware,
+  createRateLimitMiddleware,
+  createPIIFilterMiddleware,
+  createSamplingMiddleware,
+  createBatchMiddleware,
+} from "./src/middleware";
+
+// Performance Utilities (Phase 4)
+export {
+  PerformanceMonitor,
+  lazyLoadGTM,
+  measureEventPerformance,
+  createDebouncedEventSender,
+  createThrottledEventSender,
+  checkGTMPerformance,
+} from "./src/performance";
+
+// Observability (Phase 5)
+export {
+  ObservabilityManager,
+  createObservabilityManager,
+  useObservability,
+} from "./src/observability";
+
 // Types
 export type { GTMEvent, GTMConfig } from "./src/sendGTMEvent";
 export type { GoogleTagManagerProps } from "./src/GoogleTagManager";
@@ -46,3 +79,19 @@ export type {
   TypedGTMEvent,
   EcommerceEvents,
 } from "./src/types/events";
+export type {
+  TypeSafeGTMClient,
+} from "./src/factory/createGTMClient";
+export type {
+  EventMiddleware,
+  AsyncEventMiddleware,
+  MiddlewareContext,
+} from "./src/middleware/types";
+export type {
+  LoadStrategy,
+  PerformanceConfig,
+} from "./src/performance";
+export type {
+  ObservabilityConfig,
+  ObservabilityMetrics,
+} from "./src/observability";
