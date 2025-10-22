@@ -12,17 +12,10 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.trackCustomEvent = exports.trackFormSubmission = exports.trackButtonClick = exports.trackPageView = void 0;
-// Generic function to send any event
-var sendGTMEvent = function (eventData) {
-    if (!window.dataLayer) {
-        console.warn("Google Tag Manager dataLayer is not initialized.");
-        return;
-    }
-    window.dataLayer.push(eventData);
-};
+var sendGTMEvent_1 = require("../sendGTMEvent");
 // Utility function for page views
 var trackPageView = function (page) {
-    sendGTMEvent({
+    (0, sendGTMEvent_1.sendGTMEvent)({
         event: "page_view",
         page: page,
     });
@@ -30,7 +23,7 @@ var trackPageView = function (page) {
 exports.trackPageView = trackPageView;
 // Utility function for button clicks
 var trackButtonClick = function (buttonName) {
-    sendGTMEvent({
+    (0, sendGTMEvent_1.sendGTMEvent)({
         event: "button_click",
         button_name: buttonName,
     });
@@ -38,7 +31,7 @@ var trackButtonClick = function (buttonName) {
 exports.trackButtonClick = trackButtonClick;
 // Utility function for form submissions
 var trackFormSubmission = function (formId) {
-    sendGTMEvent({
+    (0, sendGTMEvent_1.sendGTMEvent)({
         event: "form_submission",
         form_id: formId,
     });
@@ -46,6 +39,7 @@ var trackFormSubmission = function (formId) {
 exports.trackFormSubmission = trackFormSubmission;
 // Utility function for custom events
 var trackCustomEvent = function (eventName, properties) {
-    sendGTMEvent(__assign({ event: eventName }, properties));
+    (0, sendGTMEvent_1.sendGTMEvent)(__assign({ event: eventName }, properties));
 };
 exports.trackCustomEvent = trackCustomEvent;
+//# sourceMappingURL=trackEvents.js.map

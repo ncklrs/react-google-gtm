@@ -17,10 +17,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendGTMEvent = exports.GoogleTagManager = void 0;
+exports.configureGTM = exports.sendGTMEvent = exports.NoScript = exports.GoogleTagManager = void 0;
 // index.ts
 var GoogleTagManager_1 = __importDefault(require("./src/GoogleTagManager"));
 exports.GoogleTagManager = GoogleTagManager_1.default;
+var NoScript_1 = __importDefault(require("./src/NoScript"));
+exports.NoScript = NoScript_1.default;
 var sendGTMEvent_1 = require("./src/sendGTMEvent");
 Object.defineProperty(exports, "sendGTMEvent", { enumerable: true, get: function () { return sendGTMEvent_1.sendGTMEvent; } });
+Object.defineProperty(exports, "configureGTM", { enumerable: true, get: function () { return sendGTMEvent_1.configureGTM; } });
 __exportStar(require("./src/utils/trackEvents"), exports);
+//# sourceMappingURL=index.js.map

@@ -1,3 +1,5 @@
+import { sendGTMEvent } from "../sendGTMEvent";
+
 interface PageViewEvent {
   event: "page_view";
   page: string;
@@ -12,20 +14,6 @@ interface FormSubmissionEvent {
   event: "form_submission";
   form_id: string;
 }
-
-type CustomEvent = {
-  event: string;
-  [key: string]: any;
-};
-
-// Generic function to send any event
-const sendGTMEvent = (eventData: CustomEvent): void => {
-  if (!window.dataLayer) {
-    console.warn("Google Tag Manager dataLayer is not initialized.");
-    return;
-  }
-  window.dataLayer.push(eventData);
-};
 
 // Utility function for page views
 export const trackPageView = (page: string): void => {
