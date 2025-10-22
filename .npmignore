@@ -1,0 +1,39 @@
+# Source files
+src/
+*.ts
+*.tsx
+!*.d.ts
+
+# Config files
+tsconfig.json
+.eslintrc.js
+.prettierrc
+jest.config.js
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Testing
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+coverage/
+.jest-cache/
+
+# Editor
+.vscode/
+.idea/
+
+# Misc
+*.log
+.DS_Store
+node_modules/
+
+# Documentation (keep README.md)
+CONTRIBUTING.md

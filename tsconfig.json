@@ -6,7 +6,15 @@
     "jsx": "react",
     "strict": true,
     "declaration": true,
-    "esModuleInterop": true
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "lib": ["ES2015", "DOM"]
   },
-  "include": ["src/**/*", "index.ts", "global.d.ts"]
+  "include": ["src/**/*", "index.ts", "global.d.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
 }
