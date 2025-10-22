@@ -6,17 +6,34 @@
 
 A modern, type-safe React package for integrating Google Tag Manager with your application. Built with TypeScript and designed for production use.
 
+## ✨ What's New in v2.0
+
+Version 2.0 brings a completely revamped developer experience with React Context, custom hooks, and powerful analytics patterns:
+
+- 🎣 **React Hooks API** - `useGTM`, `useGTMEvent`, `useGTMPageView`, `useGTMClick`, `useGTMForm`
+- 🏗️ **Context Provider** - Access GTM anywhere in your app with `GTMProvider`
+- ⚡ **Event Queue** - Events sent before GTM loads are automatically queued and flushed
+- 🍪 **Consent Management** - Built-in GDPR/CCPA consent mode support
+- 🐛 **Visual Debugger** - Beautiful debug UI component for development
+- 📊 **Analytics Patterns** - Scroll tracking, time on page, visibility tracking, error boundary
+- 🧪 **Testing Utilities** - Comprehensive testing helpers for GTM events
+- 📘 **TypeScript First** - Enhanced type safety with generic event types
+
 ## Features
 
 - **TypeScript Support**: Full type definitions included
 - **React Hooks**: Built with modern React hooks
-- **Debug Mode**: Enable debug logging for development
+- **Context API**: Access GTM anywhere in your component tree
+- **Event Queue**: Never lose events during GTM initialization
+- **Consent Management**: GDPR/CCPA compliant consent mode
+- **Debug Mode**: Visual debugger component + console logging
 - **Environment Support**: GTM preview and authentication for testing
 - **CSP Compatible**: Support for nonce attributes
 - **SSR Ready**: Works with Next.js and other SSR frameworks
 - **Tree-shakeable**: ESM and CommonJS builds
-- **Fully Tested**: Comprehensive test coverage
+- **Fully Tested**: Comprehensive test coverage with testing utilities
 - **Type-safe Events**: Export all TypeScript interfaces
+- **Analytics Patterns**: Common tracking patterns built-in
 
 ## Installation
 
@@ -26,408 +43,557 @@ npm install react-google-gtm
 
 ## Quick Start
 
-### Basic Setup
+### Modern API (v2.0 - Recommended)
+
+Use the new Context Provider and hooks for the best developer experience:
 
 ```tsx
 import React from 'react';
-import { GoogleTagManager } from 'react-google-gtm';
+import { GTMProvider, useGTM, useGTMPageView } from 'react-google-gtm';
+
+function App() {
+  return (
+    <GTMProvider
+      gtmId="GTM-XXXXXX"
+      config={{ debug: true }}
+    >
+      <YourApp />
+    </GTMProvider>
+  );
+}
+
+function YourComponent() {
+  const { sendEvent, isReady } = useGTM();
+
+  // Automatically track page views
+  useGTMPageView();
+
+  const handleClick = () => {
+    sendEvent({
+      event: 'button_click',
+      button_name: 'Get Started'
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>Get Started</button>
+      {isReady && <p>GTM is ready!</p>}
+    </div>
+  );
+}
+```
+
+### Legacy API (Still Supported)
+
+The original API continues to work for backwards compatibility:
+
+```tsx
+import React from 'react';
+import { GoogleTagManager, sendGTMEvent } from 'react-google-gtm';
 
 const App: React.FC = () => {
   return (
     <>
       <GoogleTagManager gtmId="GTM-XXXXXX" />
-      {/* Your app content */}
+      <button onClick={() => sendGTMEvent({ event: 'button_click' })}>
+        Click Me
+      </button>
     </>
   );
 };
-
-export default App;
 ```
 
-### With NoScript Fallback
+## Core API
 
-For users with JavaScript disabled, add the `NoScript` component in your document body:
+### GTMProvider
 
-```tsx
-import { GoogleTagManager, NoScript } from 'react-google-gtm';
-
-const App: React.FC = () => {
-  return (
-    <html>
-      <head>
-        <GoogleTagManager gtmId="GTM-XXXXXX" />
-      </head>
-      <body>
-        <NoScript gtmId="GTM-XXXXXX" />
-        {/* Your app content */}
-      </body>
-    </html>
-  );
-};
-```
-
-## API Reference
-
-### `GoogleTagManager`
-
-Main component to load the Google Tag Manager script.
-
-**Props:**
-
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `gtmId` | `string` | Yes | - | Your Google Tag Manager ID (e.g., "GTM-XXXXXX") |
-| `dataLayer` | `Record<string, any>[]` | No | `[]` | Initial dataLayer configuration |
-| `additionalScripts` | `string[]` | No | `[]` | Additional script URLs to load |
-| `dataLayerName` | `string` | No | `"dataLayer"` | Custom dataLayer variable name |
-| `auth` | `string` | No | - | GTM environment auth parameter |
-| `preview` | `string` | No | - | GTM environment preview parameter |
-| `nonce` | `string` | No | - | Nonce attribute for CSP compatibility |
-
-**Example:**
+Wrap your app with the GTM Provider to enable hooks and context:
 
 ```tsx
-<GoogleTagManager
+import { GTMProvider } from 'react-google-gtm';
+
+<GTMProvider
   gtmId="GTM-XXXXXX"
-  dataLayer={[{ userId: '12345', userType: 'premium' }]}
-  auth="abc123"
-  preview="env-1"
-  nonce="random-nonce-value"
-/>
+  config={{ debug: true }}
+  consent={{
+    ad_storage: 'denied',
+    analytics_storage: 'granted'
+  }}
+  onLoad={(loadTime) => console.log('GTM loaded in', loadTime, 'ms')}
+  onError={(error) => console.error('GTM error:', error)}
+  onEvent={(event) => console.log('Event sent:', event)}
+>
+  <App />
+</GTMProvider>
 ```
-
-### `NoScript`
-
-Fallback component for users with JavaScript disabled.
 
 **Props:**
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `gtmId` | `string` | Yes | - | Your Google Tag Manager ID |
-| `auth` | `string` | No | - | GTM environment auth parameter |
-| `preview` | `string` | No | - | GTM environment preview parameter |
+| Prop | Type | Description |
+|------|------|-------------|
+| `gtmId` | `string` | Your GTM container ID |
+| `config` | `GTMConfig` | Debug mode and other config |
+| `consent` | `ConsentSettings` | GDPR consent settings |
+| `dataLayer` | `Record<string, any>[]` | Initial dataLayer |
+| `auth` | `string` | GTM environment auth |
+| `preview` | `string` | GTM environment preview |
+| `nonce` | `string` | CSP nonce |
+| `onLoad` | `(loadTime: number) => void` | Called when GTM loads |
+| `onError` | `(error: Error) => void` | Error callback |
+| `onEvent` | `(event: GTMEvent) => void` | Called for each event |
 
-### `sendGTMEvent`
+## React Hooks
 
-Send custom events to the dataLayer.
+### useGTM()
 
-**Parameters:**
-- `eventData` (`GTMEvent`): The event data to be pushed to the dataLayer.
-
-**Example:**
-
-```tsx
-import { sendGTMEvent } from 'react-google-gtm';
-
-const handlePurchase = () => {
-  sendGTMEvent({
-    event: 'purchase',
-    ecommerce: {
-      transaction_id: 'T12345',
-      value: 99.99,
-      currency: 'USD',
-      items: [
-        {
-          item_id: 'SKU123',
-          item_name: 'Product Name',
-          price: 99.99,
-        }
-      ]
-    }
-  });
-};
-```
-
-### `configureGTM`
-
-Configure GTM behavior globally.
-
-**Parameters:**
-- `options` (`GTMConfig`): Configuration options
-
-**Options:**
-- `debug` (`boolean`): Enable debug logging to console
-
-**Example:**
+Access GTM context from any component:
 
 ```tsx
-import { configureGTM } from 'react-google-gtm';
+import { useGTM } from 'react-google-gtm';
 
-// Enable debug mode in development
-if (process.env.NODE_ENV === 'development') {
-  configureGTM({ debug: true });
+function MyComponent() {
+  const { sendEvent, isReady, updateConsent, getDataLayer } = useGTM();
+
+  return (
+    <button onClick={() => sendEvent({ event: 'click', button: 'subscribe' })}>
+      Subscribe
+    </button>
+  );
 }
 ```
 
-## Tracking Utilities
+### useGTMEvent()
 
-Convenience functions for common tracking scenarios:
-
-### `trackPageView`
-
-Track page view events.
+Declarative event tracking based on dependencies:
 
 ```tsx
-import { trackPageView } from 'react-google-gtm';
+import { useGTMEvent } from 'react-google-gtm';
+import { useLocation } from 'react-router-dom';
 
-trackPageView('home');
+function App() {
+  const location = useLocation();
+
+  // Send event when location changes
+  useGTMEvent(
+    { event: 'page_view', page: location.pathname },
+    [location]
+  );
+
+  return <Routes />;
+}
 ```
 
-### `trackButtonClick`
+### useGTMPageView()
 
-Track button click events.
+Automatic page view tracking:
 
 ```tsx
-import { trackButtonClick } from 'react-google-gtm';
+import { useGTMPageView } from 'react-google-gtm';
 
-const Button = () => (
-  <button onClick={() => trackButtonClick('Subscribe Now')}>
-    Subscribe
-  </button>
-);
+function ProductPage({ productId }: { productId: string }) {
+  useGTMPageView('/product', {
+    product_id: productId,
+    category: 'electronics'
+  });
+
+  return <ProductDetails />;
+}
 ```
 
-### `trackFormSubmission`
+### useGTMClick()
 
-Track form submission events.
+Create click handlers with automatic tracking:
 
 ```tsx
-import { trackFormSubmission } from 'react-google-gtm';
+import { useGTMClick } from 'react-google-gtm';
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  trackFormSubmission('contact-form');
-};
+function CTAButton() {
+  const handleClick = useGTMClick('cta_click', {
+    button_name: 'Sign Up',
+    location: 'hero'
+  });
+
+  return <button onClick={handleClick}>Sign Up</button>;
+}
 ```
 
-### `trackCustomEvent`
+### useGTMForm()
 
-Track custom events with additional properties.
+Track form interactions:
 
 ```tsx
-import { trackCustomEvent } from 'react-google-gtm';
+import { useGTMForm } from 'react-google-gtm';
 
-trackCustomEvent('video_play', {
-  category: 'engagement',
-  label: 'product_demo',
-  value: 1,
-  video_duration: 120
+function ContactForm() {
+  const { onSubmit, onChange } = useGTMForm({
+    formId: 'contact_form',
+    trackChange: true
+  });
+
+  return (
+    <form onSubmit={onSubmit}>
+      <input name="email" onChange={onChange} />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+### useTimeOnPage()
+
+Track time spent on page:
+
+```tsx
+import { useTimeOnPage } from 'react-google-gtm';
+
+function Article() {
+  useTimeOnPage({
+    pageName: 'blog_article',
+    intervals: [10000, 30000, 60000], // 10s, 30s, 1min
+    sendOnUnmount: true
+  });
+
+  return <article>...</article>;
+}
+```
+
+### useVisibilityTracking()
+
+Track element visibility:
+
+```tsx
+import { useVisibilityTracking } from 'react-google-gtm';
+import { useRef } from 'react';
+
+function Hero() {
+  const heroRef = useRef(null);
+
+  useVisibilityTracking(heroRef, {
+    threshold: 0.5,
+    trackOnce: true,
+    onVisible: () => console.log('Hero is visible!')
+  });
+
+  return <div ref={heroRef}>Hero Content</div>;
+}
+```
+
+## Components
+
+### GTMDebugger
+
+Visual debugger for development:
+
+```tsx
+import { GTMDebugger } from 'react-google-gtm';
+
+function App() {
+  return (
+    <>
+      {process.env.NODE_ENV === 'development' && (
+        <GTMDebugger
+          position="bottom-right"
+          maxEvents={20}
+          showTimestamp={true}
+        />
+      )}
+      <YourApp />
+    </>
+  );
+}
+```
+
+### ScrollTracker
+
+Track scroll depth:
+
+```tsx
+import { ScrollTracker } from 'react-google-gtm';
+
+function App() {
+  return (
+    <>
+      <ScrollTracker
+        thresholds={[25, 50, 75, 100]}
+        eventName="scroll_depth"
+        onThreshold={(percent) => console.log('Scrolled', percent, '%')}
+      />
+      <YourApp />
+    </>
+  );
+}
+```
+
+### GTMErrorBoundary
+
+Track React errors:
+
+```tsx
+import { GTMErrorBoundary } from 'react-google-gtm';
+
+function App() {
+  return (
+    <GTMErrorBoundary
+      eventName="react_error"
+      fallback={<ErrorPage />}
+      sendErrorDetails={true}
+    >
+      <YourApp />
+    </GTMErrorBoundary>
+  );
+}
+```
+
+## Consent Management
+
+### Setting Initial Consent
+
+```tsx
+<GTMProvider
+  gtmId="GTM-XXXXXX"
+  consent={{
+    ad_storage: 'denied',
+    analytics_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied'
+  }}
+>
+  <App />
+</GTMProvider>
+```
+
+### Updating Consent
+
+```tsx
+import { useGTM } from 'react-google-gtm';
+
+function CookieConsent() {
+  const { updateConsent } = useGTM();
+
+  const handleAccept = () => {
+    updateConsent({
+      ad_storage: 'granted',
+      analytics_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted'
+    });
+  };
+
+  return <button onClick={handleAccept}>Accept Cookies</button>;
+}
+```
+
+## Testing
+
+### Testing Utilities
+
+```tsx
+import {
+  mockGTM,
+  getLastEvent,
+  getAllEvents,
+  clearEvents,
+  wasEventSent
+} from 'react-google-gtm/testing';
+
+describe('MyComponent', () => {
+  beforeEach(() => {
+    mockGTM();
+  });
+
+  afterEach(() => {
+    clearEvents();
+  });
+
+  it('should track button click', () => {
+    render(<MyButton />);
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(getLastEvent()).toEqual({
+      event: 'button_click',
+      button_name: 'Submit'
+    });
+  });
+
+  it('should track multiple events', () => {
+    render(<MyComponent />);
+
+    expect(wasEventSent('page_view')).toBe(true);
+    expect(getAllEvents()).toHaveLength(3);
+  });
 });
 ```
 
-## Advanced Usage
+## TypeScript
 
-### TypeScript Integration
+### Type-Safe Events
 
-All interfaces are exported for type safety:
-
-```tsx
-import type { GTMEvent, GoogleTagManagerProps } from 'react-google-gtm';
-
-const customEvent: GTMEvent = {
-  event: 'user_action',
-  action_type: 'click',
-  element_id: 'hero-cta'
-};
-```
-
-### React Router Integration
-
-Track page views on route changes:
+Define your event schema for full type safety:
 
 ```tsx
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { trackPageView } from 'react-google-gtm';
+import { GTMProvider, useGTM } from 'react-google-gtm';
 
-function usePageTracking() {
-  const location = useLocation();
+interface MyEvents {
+  purchase: {
+    transaction_id: string;
+    value: number;
+    currency: string;
+  };
+  button_click: {
+    button_name: string;
+    location?: string;
+  };
+}
 
-  useEffect(() => {
-    trackPageView(location.pathname);
-  }, [location]);
+// Your IDE will autocomplete and type-check these!
+function MyComponent() {
+  const { sendEvent } = useGTM();
+
+  sendEvent({
+    event: 'purchase',
+    transaction_id: 'T123',
+    value: 99.99,
+    currency: 'USD'
+  });
 }
 ```
 
-### Next.js Integration
+### Built-in E-commerce Types
 
-#### App Router (Next.js 13+)
+```tsx
+import type { EcommerceEvents } from 'react-google-gtm';
+
+// Use pre-defined GA4 e-commerce event types
+const purchaseEvent: EcommerceEvents['purchase'] = {
+  transaction_id: 'T123',
+  value: 99.99,
+  currency: 'USD',
+  items: [
+    {
+      item_id: 'SKU123',
+      item_name: 'Product',
+      price: 99.99,
+      quantity: 1
+    }
+  ]
+};
+```
+
+## Next.js Integration
+
+### App Router (Next.js 13+)
 
 ```tsx
 // app/layout.tsx
-import { GoogleTagManager } from 'react-google-gtm';
+import { GTMProvider } from 'react-google-gtm';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <head>
-        <GoogleTagManager gtmId="GTM-XXXXXX" />
-      </head>
+    <html>
       <body>
-        <NoScript gtmId="GTM-XXXXXX" />
-        {children}
+        <GTMProvider gtmId="GTM-XXXXXX">
+          {children}
+        </GTMProvider>
       </body>
     </html>
   );
 }
+
+// app/page.tsx
+'use client';
+
+import { useGTMPageView } from 'react-google-gtm';
+
+export default function Home() {
+  useGTMPageView();
+  return <div>Home</div>;
+}
 ```
 
-#### Pages Router (Next.js 12 and below)
+### Pages Router
 
 ```tsx
 // pages/_app.tsx
-import { GoogleTagManager } from 'react-google-gtm';
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { trackPageView } from 'react-google-gtm';
+import { GTMProvider } from 'react-google-gtm';
 
 function MyApp({ Component, pageProps }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const handleRouteChange = (url: string) => {
-      trackPageView(url);
-    };
-
-    router.events.on('routeChangeComplete', handleRouteChange);
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router.events]);
-
   return (
-    <>
-      <GoogleTagManager gtmId="GTM-XXXXXX" />
+    <GTMProvider gtmId="GTM-XXXXXX">
       <Component {...pageProps} />
-    </>
+    </GTMProvider>
   );
 }
 ```
 
-```tsx
-// pages/_document.tsx
-import { Html, Head, Main, NextScript } from 'next/document';
-import { NoScript } from 'react-google-gtm';
+## React Router Integration
 
-export default function Document() {
-  return (
-    <Html>
-      <Head />
-      <body>
-        <NoScript gtmId="GTM-XXXXXX" />
-        <Main />
-        <NextScript />
-      </body>
-    </Html>
+```tsx
+import { useLocation } from 'react-router-dom';
+import { useGTMEvent } from 'react-google-gtm';
+
+function App() {
+  const location = useLocation();
+
+  useGTMEvent(
+    { event: 'page_view', page: location.pathname },
+    [location.pathname]
   );
+
+  return <Routes />;
 }
 ```
 
-### Testing with GTM Environments
+## Migration Guide
 
-Use GTM environments for testing in staging:
+### From v1.x to v2.0
 
-```tsx
-const gtmAuth = process.env.NEXT_PUBLIC_GTM_AUTH;
-const gtmPreview = process.env.NEXT_PUBLIC_GTM_PREVIEW;
+v2.0 is fully backwards compatible. You can migrate incrementally:
 
-<GoogleTagManager
-  gtmId="GTM-XXXXXX"
-  auth={gtmAuth}
-  preview={gtmPreview}
-/>
-```
-
-### Content Security Policy (CSP)
-
-If you're using CSP, provide a nonce:
+**Step 1: Wrap with Provider (optional but recommended)**
 
 ```tsx
-// Generate nonce server-side
-const nonce = generateNonce();
+// Before
+<GoogleTagManager gtmId="GTM-XXX" />
 
-<GoogleTagManager
-  gtmId="GTM-XXXXXX"
-  nonce={nonce}
-/>
+// After
+<GTMProvider gtmId="GTM-XXX">
+  <App />
+</GTMProvider>
 ```
 
-Your CSP header should include:
-```
-Content-Security-Policy: script-src 'nonce-{NONCE}' https://www.googletagmanager.com;
-```
-
-### E-commerce Tracking
+**Step 2: Use hooks where beneficial**
 
 ```tsx
+// Before
 import { sendGTMEvent } from 'react-google-gtm';
+sendGTMEvent({ event: 'click' });
 
-// Track add to cart
-const handleAddToCart = (product) => {
-  sendGTMEvent({
-    event: 'add_to_cart',
-    ecommerce: {
-      items: [{
-        item_id: product.id,
-        item_name: product.name,
-        price: product.price,
-        quantity: 1
-      }]
-    }
-  });
-};
-
-// Track purchase
-const handlePurchase = (order) => {
-  sendGTMEvent({
-    event: 'purchase',
-    ecommerce: {
-      transaction_id: order.id,
-      value: order.total,
-      currency: 'USD',
-      tax: order.tax,
-      shipping: order.shipping,
-      items: order.items
-    }
-  });
-};
+// After
+import { useGTM } from 'react-google-gtm';
+const { sendEvent } = useGTM();
+sendEvent({ event: 'click' });
 ```
+
+**Step 3: Leverage new features**
+
+- Add `<GTMDebugger />` for development
+- Use `<ScrollTracker />` for scroll depth
+- Add consent management
+- Write tests with testing utilities
 
 ## Best Practices
 
-1. **Place GTM component early**: Add the `GoogleTagManager` component in your root component or layout for earliest initialization.
-
-2. **Use debug mode in development**: Enable debug mode to see events in the console during development.
-
-3. **Type your events**: Use TypeScript to ensure your events have the correct structure.
-
-4. **Test with GTM environments**: Use GTM preview mode and environments for testing before production.
-
-5. **Handle privacy compliance**: Respect user consent preferences before loading GTM.
-
-6. **Avoid redundant tracking**: Use React hooks like `useEffect` to prevent duplicate events.
-
-## Debugging
-
-Enable debug mode to see all events logged to the console:
-
-```tsx
-import { configureGTM } from 'react-google-gtm';
-
-if (process.env.NODE_ENV === 'development') {
-  configureGTM({ debug: true });
-}
-```
-
-You can also verify events in:
-- Browser DevTools Console
-- Google Tag Manager Preview Mode
-- Google Analytics Real-Time Reports
+1. **Use GTMProvider** - Wrap your app for best DX
+2. **Enable debug mode** - Use `<GTMDebugger />` in development
+3. **Type your events** - Define event schemas for type safety
+4. **Test your tracking** - Use testing utilities
+5. **Handle consent** - Implement GDPR-compliant consent
+6. **Use hooks** - Leverage React patterns over imperative API
+7. **Monitor errors** - Use `<GTMErrorBoundary />`
 
 ## Browser Support
 
-This package supports all modern browsers that support ES5:
 - Chrome (latest)
 - Firefox (latest)
 - Safari (latest)
@@ -435,17 +601,13 @@ This package supports all modern browsers that support ES5:
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
-MIT License - see the [LICENSE](LICENSE) file for details.
+MIT © [Your Name]
 
 ## Support
 
 - [GitHub Issues](https://github.com/yourusername/react-google-gtm/issues)
 - [Documentation](https://github.com/yourusername/react-google-gtm#readme)
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for release history.

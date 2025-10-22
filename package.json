@@ -1,7 +1,7 @@
 {
   "name": "react-google-gtm",
-  "version": "1.0.0",
-  "description": "A simple package to send events to Google Tag Manager using React",
+  "version": "2.0.0",
+  "description": "Modern, type-safe React package for Google Tag Manager with hooks, context, consent management, and testing utilities",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
@@ -51,6 +51,7 @@
   },
   "files": [
     "dist",
+    "testing.ts",
     "README.md",
     "LICENSE"
   ],
@@ -61,6 +62,13 @@
     "typescript",
     "analytics",
     "event-tracking",
-    "dataLayer"
+    "dataLayer",
+    "react-hooks",
+    "consent-management",
+    "gdpr",
+    "testing",
+    "context-api",
+    "ga4",
+    "ecommerce-tracking"
   ]
 }
